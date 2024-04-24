@@ -13,5 +13,3 @@ Key [SPACE] - drop figure</br>
 
 
 After reaching the end of the game it saves date, lines, score to the resultScores.txt file in the current directory.
-
-**TODO:** implement complexity of the game by increasing speed.
