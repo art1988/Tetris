@@ -15,6 +15,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Tetris {
     private static BufferedImage dynamicImage;
@@ -52,6 +53,7 @@ public class Tetris {
     private static Timer timer = new Timer();
 
     private SpeedMonitor speedMonitor = new SpeedMonitor();
+    private AtomicBoolean active = new AtomicBoolean(true);
 
     private static Cell[][] staticField,  // Field that contains already placed figures. Fixed shape positions.
                             dynamicField; // And this is dynamic field which holds only currently moving figure.
@@ -521,7 +523,7 @@ public class Tetris {
             for (int y = 0; y < space[x].length; y++) {
                 if (space[y][x] == 1) {
                     if(staticField[x + displacementX][y + displacementY].isEmpty() == false) {
-                        speedMonitor.interrupt();
+                        speedMonitor.stopSpeedMonitor();
 
                         JLabel message = new JLabel("<html><p align=center>" + "<b>Game Over</b><br>Your score: " + scoreCount + "<br>Lines: " + linesCount);
                         message.setHorizontalAlignment(SwingConstants.CENTER);
@@ -599,16 +601,14 @@ public class Tetris {
         @Override
         public void run()
         {
-            while (true)
+            while (active.get())
             {
-                if(Thread.interrupted()) break;
-
                 checkAndIncreaseSpeed();
 
                 try {
                     Thread.sleep(1_000);
                 } catch (InterruptedException e) {
-                    return;
+                    throw new RuntimeException(e);
                 }
 
                 secondsHavePassed++;
@@ -626,6 +626,11 @@ public class Tetris {
                 timer = new Timer();
                 timer.schedule(new MyTimer(), 0, gameSpeed);
             }
+        }
+
+        private void stopSpeedMonitor()
+        {
+            active.set(false);
         }
     }
 }
