@@ -36,6 +36,8 @@ public class Tetris {
     private static int linesCountInRound = 0;
     private static int colourLinesCountInRound = 0;
 
+    private static int gameSpeed = 900;
+
     private static int[] currentXCord = new int[4],
                          currentYCord = new int[4];
 
@@ -48,6 +50,8 @@ public class Tetris {
                           lines = new JLabel();
 
     private static Timer timer = new Timer();
+
+    private SpeedMonitor speedMonitor = new SpeedMonitor();
 
     private static Cell[][] staticField,  // Field that contains already placed figures. Fixed shape positions.
                             dynamicField; // And this is dynamic field which holds only currently moving figure.
@@ -228,7 +232,8 @@ public class Tetris {
             {
                 field.addKeyListener(new TetrisKeyListener());
                 createFigure();
-                timer.schedule(new MyTimer(), 0, 800);
+                timer.schedule(new MyTimer(), 0, gameSpeed);
+                speedMonitor.start();
                 startGame.setEnabled(false);
             }
             else
@@ -516,12 +521,15 @@ public class Tetris {
             for (int y = 0; y < space[x].length; y++) {
                 if (space[y][x] == 1) {
                     if(staticField[x + displacementX][y + displacementY].isEmpty() == false) {
+                        speedMonitor.interrupt();
+
                         JLabel message = new JLabel("<html><p align=center>" + "<b>Game Over</b><br>Your score: " + scoreCount + "<br>Lines: " + linesCount);
                         message.setHorizontalAlignment(SwingConstants.CENTER);
 
                         JOptionPane.showMessageDialog(window, message, "Game Over", JOptionPane.INFORMATION_MESSAGE);
                         timer.cancel();
                         saveGameResults();
+
                         return;
                     }
                 }
@@ -561,8 +569,10 @@ public class Tetris {
         }
     }
 
-    class MyTimer extends TimerTask {
-        public void run() {
+    class MyTimer extends TimerTask
+    {
+        public void run()
+        {
             if(isDescendingMoveGood() == false) {
                 saveLastShapeCoords();
 
@@ -579,6 +589,43 @@ public class Tetris {
             
             updateShapeInField();
             moveDown();
+        }
+    }
+
+    class SpeedMonitor extends Thread
+    {
+        private int secondsHavePassed = 0;
+
+        @Override
+        public void run()
+        {
+            while (true)
+            {
+                if(Thread.interrupted()) break;
+
+                checkAndIncreaseSpeed();
+
+                try {
+                    Thread.sleep(1_000);
+                } catch (InterruptedException e) {
+                    return;
+                }
+
+                secondsHavePassed++;
+            }
+        }
+
+        private void checkAndIncreaseSpeed()
+        {
+            // increase speed every minute
+            if(secondsHavePassed != 0 && secondsHavePassed % 60 == 0)
+            {
+                gameSpeed -= 100;
+                timer.cancel();
+
+                timer = new Timer();
+                timer.schedule(new MyTimer(), 0, gameSpeed);
+            }
         }
     }
 }
