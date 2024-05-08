@@ -128,9 +128,9 @@ public class Tetris {
     }
 
     private void createField() {
-        dynamicImage = new BufferedImage(CELL_SIZE * COLUMN_NUMBERS, CELL_SIZE * LINE_NUMBERS, BufferedImage.TYPE_INT_RGB);
+        dynamicImage = new BufferedImage(CELL_SIZE * COLUMN_NUMBERS + 2, CELL_SIZE * LINE_NUMBERS, BufferedImage.TYPE_INT_RGB);
 
-        xOffset = (WINDOW_WIDTH - CELL_SIZE * COLUMN_NUMBERS) / 3;
+        xOffset = (WINDOW_WIDTH - CELL_SIZE * COLUMN_NUMBERS) / 3 - 2;
         yOffset = (WINDOW_HEIGHT - CELL_SIZE * LINE_NUMBERS) / 9;
 
         dynamicField = new Cell[COLUMN_NUMBERS][LINE_NUMBERS];
@@ -152,7 +152,7 @@ public class Tetris {
         for(int x = 0; x < COLUMN_NUMBERS; x++) {
             for(int y = 0; y < LINE_NUMBERS; y++) {
                 dynamicGraph.setColor(dynamicField[x][y].getColor());
-                dynamicGraph.fillRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE - 2, CELL_SIZE - 2);
+                dynamicGraph.fillRect(x * CELL_SIZE + 2, y * CELL_SIZE, CELL_SIZE - 2, CELL_SIZE - 2);
             }
         }
 
